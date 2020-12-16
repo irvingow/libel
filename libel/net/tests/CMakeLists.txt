@@ -1,0 +1,14 @@
+add_executable(channel_test channel_test.cpp)
+target_link_libraries(channel_test libel_net)
+
+add_executable(buffer_test buffer_test.cpp)
+target_link_libraries(buffer_test libel_net)
+
+add_executable(eventloop_test eventloop_test.cpp)
+target_link_libraries(eventloop_test libel_net)
+
+add_executable(timerqueue_test timerqueue_test.cpp)
+target_link_libraries(timerqueue_test libel_net)
+
+add_executable(eventloop_thread_test eventloop_thread_test.cpp)
+target_link_libraries(eventloop_thread_test libel_net)

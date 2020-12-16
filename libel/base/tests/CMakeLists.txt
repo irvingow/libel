@@ -1,0 +1,17 @@
+add_executable(mutex_test mutex_test.cpp)
+target_link_libraries(mutex_test libel_base)
+
+add_executable(thread_test Thread_test.cpp)
+target_link_libraries(thread_test libel_base)
+
+add_executable(threadpool_test threadpool_test.cpp)
+target_link_libraries(threadpool_test libel_base)
+
+add_executable(countdown_latch_test countdown_latch_test.cpp)
+target_link_libraries(countdown_latch_test libel_base)
+
+add_executable(waiter_test waiter_test.cpp)
+target_link_libraries(waiter_test libel_base)
+
+add_executable(num2string_test num2string_test.cpp)
+target_link_libraries(num2string_test libel_base)
