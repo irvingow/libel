@@ -12,3 +12,13 @@ target_link_libraries(timerqueue_test libel_net)
 
 add_executable(eventloop_thread_test eventloop_thread_test.cpp)
 target_link_libraries(eventloop_thread_test libel_net)
+
+add_executable(eventloop_threadpool_test eventloop_threadpool_test.cpp)
+target_link_libraries(eventloop_threadpool_test libel_net)
+
+add_executable(inetaddress_test inetaddress_test.cpp)
+target_link_libraries(inetaddress_test libel_net)
+
+add_executable(echoserver_test echoserver_test.cpp)
+target_link_libraries(echoserver_test libel_net)
+

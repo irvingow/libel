@@ -16,7 +16,7 @@ EventLoop* g_loop = nullptr;
 
 void callback() {
   printf("callback(): pid = %d, tid = %d\n", getpid(), CurrentThread::tid());
-  /// program will abort here because there are two eventloop in one thread.
+  /// program will abort here because there are two eventloops in one thread.
   EventLoop anotherLoop;
 }
 

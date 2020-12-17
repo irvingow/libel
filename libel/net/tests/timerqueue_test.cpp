@@ -13,7 +13,25 @@ using namespace Libel;
 using namespace Libel::net;
 
 size_t g_count = 0;
+int cnt = 0;
+EventLoop* g_loop;
 std::unique_ptr<TimerQueue> timerQueue = nullptr;
+
+
+void print(const char* msg) {
+  printf("msg %s %s\n", TimeStamp::now().toString().c_str(), msg);
+  if (++cnt == 20)
+    g_loop->quit();
+}
+
+void cancel(const TimerId &timerId) {
+  g_loop->cancel(timerId);
+  printf("cancelled at %s\n", TimeStamp::now().toString().c_str());
+}
+
+void quit(EventLoop *loop) {
+  loop->quit();
+}
 
 void timerCallback() {
   g_count--;
@@ -60,11 +78,33 @@ void testCancelTimer(EventLoop* loop) {
   timerQueue->cancel(timerId15);
   assert(timerQueue->getTimers().empty());
   assert(timerQueue->getActiveTimers().empty());
+  loop->runAfter(3, std::bind(quit, loop));
 }
 
 int main() {
-  EventLoop loop;
-  testCancelTimer(&loop);
-  testAddTimer(&loop);
-  loop.loop();
+  {
+    EventLoop loop;
+    testCancelTimer(&loop);
+    testAddTimer(&loop);
+    loop.loop();
+    /// we have to reset timerQueue because the corresponding eventloop is destroyed.
+    timerQueue.reset();
+  }
+  {
+    EventLoop loop;
+    g_loop = &loop;
+    loop.runAfter(1, std::bind(print, "once1"));
+    loop.runAfter(1.5, std::bind(print, "once1.5"));
+    loop.runAfter(2.5, std::bind(print, "once2.5"));
+    loop.runAfter(3.5, std::bind(print, "once3.5"));
+    TimerId timerId = loop.runAfter(4.5, std::bind(print, "once4.5"));
+    loop.runAfter(4.2, std::bind(cancel, timerId));
+    loop.runAfter(4.8, std::bind(cancel, timerId));
+    loop.runEvery(2, std::bind(print, "every2"));
+    auto timer3 = loop.runEvery(3, std::bind(print, "every3"));
+    loop.runAfter(9.001, std::bind(cancel, timer3));
+
+    loop.loop();
+    print("main loop exists");
+  }
 }
