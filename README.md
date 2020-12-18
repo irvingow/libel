@@ -19,3 +19,14 @@
 * 使用eventfd来实现线程的异步唤醒
 * 尽量使用智能指针以及RAII机制来避免内存泄露
 * 避免使用继承，使用std::function作为签名，传递函数时使用std::bind
+
+### Environment
+
+* OS: Ubuntu 16.04
+* Compiler: g++ 5.4.0
+
+### BUILD
+
+> mkdir build && cd build/
+>
+> cmake .. && make
