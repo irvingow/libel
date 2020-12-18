@@ -38,7 +38,7 @@ class EchoServer {
   void onMessage(const TcpConnectionPtr& connectionPtr, Buffer* buffer,
                  TimeStamp time) {
     std::string msg(buffer->retrieveAllAsString());
-    LOG_TRACE << connectionPtr->name() << " recv " << msg.size() << " bytes at "
+    LOG_INFO << connectionPtr->name() << " recv " << msg.size() << " bytes at "
               << time.toString();
     if (msg == "quit\n")
       loop_->quit();

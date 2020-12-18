@@ -14,6 +14,9 @@
 using namespace Libel;
 using namespace Libel::net;
 
+const int Connector::kMaxRetryDelayMs;
+const int Connector::kInitRetryDelayMs;
+
 Connector::Connector(Libel::net::EventLoop *loop,
                      const Libel::net::InetAddress &serverAddr)
     : loop_(loop),
@@ -102,7 +105,7 @@ void Connector::restart() {
 
 void Connector::connecting(int sockfd) {
   setState(kConnecting);
-  assert(channel_);
+  assert(!channel_);
   channel_.reset(new Channel(loop_, sockfd));
   channel_->setWriteCallback(std::bind(&Connector::handleWrite, this));
   channel_->setErrorCallback(std::bind(&Connector::handleError, this));
@@ -165,7 +168,10 @@ void Connector::retry(int sockfd) {
   if (connect_) {
     LOG_INFO << "Connector::retry - Retry connecting to " << serverAddr_.toIpPort()
     << " in " << retryDelayMs_ << " milliseconds. ";
-    // TODO add delay retry event
+    loop_->runAfter(retryDelayMs_ / 1000.0, std::bind(&Connector::startInLoop, shared_from_this()));
+    retryDelayMs_ = std::min(retryDelayMs_ * 2, Connector::kMaxRetryDelayMs);
+  } else {
+    LOG_DEBUG << "do not connect";
   }
 }
 

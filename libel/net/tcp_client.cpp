@@ -70,7 +70,7 @@ TcpClient::~TcpClient() {
 }
 
 void TcpClient::connect() {
-  LOG_INFO << "TcpClient::connect[" <<name_ << "] - connecting to"
+  LOG_INFO << "TcpClient::connect[" <<name_ << "] - connecting to "
       << connector_->serverAddress().toIpPort();
   connect_ = true;
   connector_->start();

@@ -22,3 +22,15 @@ target_link_libraries(inetaddress_test libel_net)
 add_executable(echoserver_test echoserver_test.cpp)
 target_link_libraries(echoserver_test libel_net)
 
+add_executable(echoclient_test echoclient_test.cpp)
+target_link_libraries(echoclient_test libel_net)
+
+add_executable(tcpclient_test1 tcpclient_test1.cpp)
+target_link_libraries(tcpclient_test1 libel_net)
+
+add_executable(tcpclient_test2 tcpclient_test2.cpp)
+target_link_libraries(tcpclient_test2 libel_net)
+
+add_executable(tcpclient_test3 tcpclient_test3.cpp)
+target_link_libraries(tcpclient_test3 libel_net)
+
