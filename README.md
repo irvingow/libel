@@ -19,6 +19,7 @@
 * 使用eventfd来实现线程的异步唤醒
 * 尽量使用智能指针以及RAII机制来避免内存泄露
 * 避免使用继承，使用std::function作为签名，传递函数时使用std::bind
+* 使用std::shared_ptr\<void\> 来替代void \*，防止内存泄漏
 
 ### Environment
 
