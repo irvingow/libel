@@ -91,7 +91,7 @@ class EventLoop : noncopyable {
   bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
   bool eventHandling() const { return eventHandling_; }
 
-  void setContext(void *context) { context_ = context; }
+  void setContext(std::shared_ptr<void> context) { context_ = context; }
 
   static EventLoop *getEventLoopOfCurrentThead();
 
@@ -113,7 +113,7 @@ class EventLoop : noncopyable {
   std::unique_ptr<TimerQueue> timerQueue_;
   int wakeupFd_;
   std::unique_ptr<Channel> wakeupChannel_;
-  void *context_;
+  std::shared_ptr<void> context_;
 
   ChannelList activeChannels_;
   Channel *currentActiveChannel_;

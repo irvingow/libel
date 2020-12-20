@@ -17,8 +17,7 @@ using namespace Libel::net;
 
 TcpServer::TcpServer(Libel::net::EventLoop *loop,
                      const Libel::net::InetAddress &listenAddr,
-                     std::string nameArg,
-                     Libel::net::TcpServer::Option option)
+                     std::string nameArg, Libel::net::TcpServer::Option option)
     : loop_(loop),
       ipPort_(listenAddr.toIpPort()),
       name_(std::move(nameArg)),
@@ -28,7 +27,8 @@ TcpServer::TcpServer(Libel::net::EventLoop *loop,
       messageCallback_(defaultMessageCallback),
       started_(ATOMIC_FLAG_INIT),
       nextConnId_(1) {
-  acceptor_->setNewConnectionCallback(std::bind(&TcpServer::newConnection, this, _1, _2));
+  acceptor_->setNewConnectionCallback(
+      std::bind(&TcpServer::newConnection, this, _1, _2));
   started_.clear();
 }
 
@@ -36,10 +36,11 @@ TcpServer::~TcpServer() {
   loop_->assertInLoopThread();
   LOG_TRACE << "TcpServer::~TcpServer [" << name_ << "] destructing";
 
-  for (auto& item : connections_) {
+  for (auto &item : connections_) {
     TcpConnectionPtr conn(item.second);
     item.second.reset();
-    conn->getLoop()->runInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
+    conn->getLoop()->runInLoop(
+        std::bind(&TcpConnection::connectDestroyed, conn));
   }
 }
 
@@ -56,7 +57,8 @@ void TcpServer::start() {
   }
 }
 
-void TcpServer::newConnection(int sockfd, const Libel::net::InetAddress &peerAddr) {
+void TcpServer::newConnection(int sockfd,
+                              const Libel::net::InetAddress &peerAddr) {
   loop_->assertInLoopThread();
   auto ioLoop = threadPool_->getNextLoop();
   char buf[64] = {};
@@ -64,11 +66,11 @@ void TcpServer::newConnection(int sockfd, const Libel::net::InetAddress &peerAdd
   ++nextConnId_;
   std::string connName = name_ + buf;
 
-  LOG_INFO << "TcpServer::newConnection [" << name_
-      << "] - new connection [" << connName
-      << "] from " << peerAddr.toIpPort();
+  LOG_INFO << "TcpServer::newConnection [" << name_ << "] - new connection ["
+           << connName << "] from " << peerAddr.toIpPort();
   InetAddress localAddr(sockets::getLocalAddr(sockfd));
-  TcpConnectionPtr conn(new TcpConnection(ioLoop, connName, sockfd, localAddr, peerAddr));
+  TcpConnectionPtr conn(
+      new TcpConnection(ioLoop, connName, sockfd, localAddr, peerAddr));
   connections_[connName] = conn;
   conn->setConnectionCallback(connectionCallback_);
   conn->setMessageCallback(messageCallback_);
@@ -81,33 +83,14 @@ void TcpServer::removeConnection(const Libel::net::TcpConnectionPtr &conn) {
   loop_->runInLoop(std::bind(&TcpServer::removeConnectionInLoop, this, conn));
 }
 
-void TcpServer::removeConnectionInLoop(const Libel::net::TcpConnectionPtr &conn) {
+void TcpServer::removeConnectionInLoop(
+    const Libel::net::TcpConnectionPtr &conn) {
   loop_->assertInLoopThread();
-  LOG_INFO << "TcpServer::removeConnectionInLoop [" << name_
-      << "] - connection" << conn->name();
+  LOG_INFO << "TcpServer::removeConnectionInLoop [" << name_ << "] - connection"
+           << conn->name();
   size_t n = connections_.erase(conn->name());
   (void)n;
   assert(n == 1);
   auto ioLoop = conn->getLoop();
   ioLoop->queueInLoop(std::bind(&TcpConnection::connectDestroyed, conn));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

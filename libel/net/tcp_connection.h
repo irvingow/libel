@@ -39,7 +39,7 @@ class TcpConnection : noncopyable,
   ~TcpConnection();
 
   EventLoop* getLoop() const { return loop_; }
-  const std::string &name() const { return name_; }
+  const std::string& name() const { return name_; }
   const InetAddress& localAddress() const { return localAddr_; }
   const InetAddress& peerAddress() const { return peerAddr_; }
   bool connected() const { return state_ == kConnected; }
@@ -50,22 +50,20 @@ class TcpConnection : noncopyable,
 
   void send(const void* message, int len);
   void send(const std::string& message);
-  void send(Buffer* message); // this one will swap data
-  void shutdown(); // NOT thread safe, but no simultaneous calling
+  void send(Buffer* message);  // this one will swap data
+  void shutdown();             // NOT thread safe, but no simultaneous calling
   void forceClose();
   void forceCloseWithDelay(double seconds);
   void setTcpNoDelay(bool on);
   void startRead();
   void stopRead();
-  bool isReading() const { return reading_; } // NOT thread safe, may race with start/stopReadInLoop
+  bool isReading() const {
+    return reading_;
+  }  // NOT thread safe, may race with start/stopReadInLoop
 
-  void setContext(void *context) {
-    context_ = context;
-  }
+  void setContext(std::shared_ptr<void> context) { context_ = context; }
 
-  void* getContext() const {
-    return context_;
-  }
+  const std::shared_ptr<void>& getContext() const { return context_; }
 
   void setConnectionCallback(ConnectionCallback cb) {
     connectionCallback_ = std::move(cb);
@@ -79,42 +77,32 @@ class TcpConnection : noncopyable,
     writeCompleteCallback_ = std::move(cb);
   }
 
-  void setHighWaterMarkCallback(HighWaterMarkCallback cb, size_t highWaterMark) {
+  void setHighWaterMarkCallback(HighWaterMarkCallback cb,
+                                size_t highWaterMark) {
     highWaterMarkCallback_ = std::move(cb);
     highWaterMark_ = highWaterMark;
   }
 
-  void setCloseCallback(CloseCallback cb) {
-    closeCallback_ = std::move(cb);
-  }
+  void setCloseCallback(CloseCallback cb) { closeCallback_ = std::move(cb); }
 
   /// called when TcpServer accepts a new connection
-  void connectEstablished(); /// should be called only once
+  void connectEstablished();  /// should be called only once
   /// called when TcpClient has removed self from its map
-  void connectDestroyed(); /// should be called only once
+  void connectDestroyed();  /// should be called only once
 
   /// for some special usage
-  Buffer* inputBuffer() {
-    return &inputBuffer_;
-  }
+  Buffer* inputBuffer() { return &inputBuffer_; }
 
-  Buffer* outputBuffer() {
-    return &outputBuffer_;
-  }
+  Buffer* outputBuffer() { return &outputBuffer_; }
 
-private:
-  enum StateE {
-    kDisconnected,
-    kConnecting,
-    kConnected,
-    kDisconnecting
-  };
+ private:
+  enum StateE { kDisconnected, kConnecting, kConnected, kDisconnecting };
   void handleRead(TimeStamp receiveTime);
   void handleWrite();
   void handleClose();
   void handleError();
   void sendInLoop(const std::string& message);
-  void sendInLoop(const void *message, size_t len);
+  void sendInLoop(const void* message, size_t len);
   void shutdownInLoop();
   void forceCloseInLoop();
   void setState(StateE s) { state_ = s; }
@@ -123,7 +111,6 @@ private:
   void stopReadInLoop();
 
  private:
-
   EventLoop* loop_;
   const std::string name_;
   StateE state_;
@@ -140,7 +127,7 @@ private:
   size_t highWaterMark_;
   Buffer inputBuffer_;
   Buffer outputBuffer_;
-  void *context_;
+  std::shared_ptr<void> context_;
 };
 
 }  // namespace net
