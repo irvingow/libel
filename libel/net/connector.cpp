@@ -86,11 +86,13 @@ void Connector::connect() {
     case EALREADY:
     case EFAULT:
     case ENOTSOCK:
-      LOG_ERROR << "connect error in Connector::startInLoop error:" << strerror(savedErrno);
+      LOG_ERROR << "connect error in Connector::startInLoop error:"
+                << strerror(savedErrno);
       sockets::close(sockfd);
       break;
     default:
-      LOG_ERROR << "unexpected error in Connector::startInLoop error:" << strerror(savedErrno);
+      LOG_ERROR << "unexpected error in Connector::startInLoop error:"
+                << strerror(savedErrno);
       break;
   }
 }
@@ -123,9 +125,7 @@ int Connector::removeAndResetChannel() {
   return sockfd;
 }
 
-void Connector::resetChannel() {
-  channel_.reset();
-}
+void Connector::resetChannel() { channel_.reset(); }
 
 void Connector::handleWrite() {
   LOG_TRACE << "Connector::handleWrite " << state_;
@@ -134,8 +134,8 @@ void Connector::handleWrite() {
     int sockfd = removeAndResetChannel();
     int err = sockets::getSocketError(sockfd);
     if (err) {
-      LOG_WARN << "Connector::handleWrite - SO_ERROR = "
-      << err << " " << strerror(err);
+      LOG_WARN << "Connector::handleWrite - SO_ERROR = " << err << " "
+               << strerror(err);
       retry(sockfd);
     } else if (sockets::isSelfConnect(sockfd)) {
       LOG_WARN << "Connector::handleWrite - Self connect";
@@ -166,24 +166,13 @@ void Connector::retry(int sockfd) {
   sockets::close(sockfd);
   setState(kDisconnected);
   if (connect_) {
-    LOG_INFO << "Connector::retry - Retry connecting to " << serverAddr_.toIpPort()
-    << " in " << retryDelayMs_ << " milliseconds. ";
-    loop_->runAfter(retryDelayMs_ / 1000.0, std::bind(&Connector::startInLoop, shared_from_this()));
+    LOG_INFO << "Connector::retry - Retry connecting to "
+             << serverAddr_.toIpPort() << " in " << retryDelayMs_
+             << " milliseconds. ";
+    loop_->runAfter(retryDelayMs_ / 1000.0,
+                    std::bind(&Connector::startInLoop, shared_from_this()));
     retryDelayMs_ = std::min(retryDelayMs_ * 2, Connector::kMaxRetryDelayMs);
   } else {
     LOG_DEBUG << "do not connect";
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

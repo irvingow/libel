@@ -20,6 +20,7 @@
 * 尽量使用智能指针以及RAII机制来避免内存泄露
 * 避免使用继承，使用std::function作为签名，传递函数时使用std::bind
 * 使用std::shared_ptr\<void\> 来替代void \*，防止内存泄漏
+* 使用idle fd来避免当文件描述符不够用时，accept出现busy loop的情况
 
 ### Environment
 

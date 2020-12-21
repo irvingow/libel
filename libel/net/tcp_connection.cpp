@@ -7,9 +7,9 @@
 #include "libel/base/logging.h"
 #include "libel/net/callbacks.h"
 #include "libel/net/channel.h"
+#include "libel/net/eventloop.h"
 #include "libel/net/socket.h"
 #include "libel/net/sockets_ops.h"
-#include "libel/net/eventloop.h"
 
 #include <cerrno>
 
@@ -47,13 +47,13 @@ TcpConnection::TcpConnection(Libel::net::EventLoop *loop, std::string name,
   channel_->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
   channel_->setErrorCallback(std::bind(&TcpConnection::handleError, this));
   LOG_DEBUG << "TcpConnection::ctor[" << name_ << "] at " << this
-  << " fd = " << sockfd;
+            << " fd = " << sockfd;
   socket_->setKeepAlive(true);
 }
 
 TcpConnection::~TcpConnection() {
   LOG_DEBUG << "TcpConnection::dtor[" << name_ << "] at " << this
-  << " fd = " << channel_->fd() << " state = " << stateToString();
+            << " fd = " << channel_->fd() << " state = " << stateToString();
   assert(state_ == kDisconnected);
 }
 
@@ -69,7 +69,7 @@ std::string TcpConnection::getTcpInfoString() const {
 }
 
 void TcpConnection::send(const void *message, int len) {
-  send(std::string(static_cast<const char*>(message), len));
+  send(std::string(static_cast<const char *>(message), len));
 }
 
 void TcpConnection::send(const std::string &message) {
@@ -77,7 +77,8 @@ void TcpConnection::send(const std::string &message) {
     if (loop_->isInLoopThread()) {
       sendInLoop(message);
     } else {
-      void (TcpConnection::*fp)(const std::string& message) = &TcpConnection::sendInLoop;
+      void (TcpConnection::*fp)(const std::string &message) =
+          &TcpConnection::sendInLoop;
       loop_->queueInLoop(std::bind(fp, this, message));
     }
   }
@@ -89,7 +90,8 @@ void TcpConnection::send(Buffer *message) {
       sendInLoop(message->peek(), message->readableBytes());
       message->retrieveAll();
     } else {
-      void (TcpConnection::*fp)(const std::string& message) = &TcpConnection::sendInLoop;
+      void (TcpConnection::*fp)(const std::string &message) =
+          &TcpConnection::sendInLoop;
       loop_->runInLoop(std::bind(fp, this, message->retrieveAllAsString()));
     }
   }
@@ -114,26 +116,28 @@ void TcpConnection::sendInLoop(const void *message, size_t len) {
     if (nwrote >= 0) {
       remaining = len - nwrote;
       if (remaining == 0 && writeCompleteCallback_)
-        loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
+        loop_->queueInLoop(
+            std::bind(writeCompleteCallback_, shared_from_this()));
     } else {
       nwrote = 0;
       if (errno != EWOULDBLOCK) {
         LOG_ERROR << " failed to call send in TcpConnection::sendInLoop";
-        if (errno == EPIPE || errno == ECONNRESET) // FIXME: any other?
+        if (errno == EPIPE || errno == ECONNRESET)  // FIXME: any other?
           fatalError = true;
       }
     }
   }
   assert(remaining <= len);
   if (!fatalError && remaining > 0) {
-    size_t  oldlen = outputBuffer_.readableBytes();
-    if (oldlen + remaining >= highWaterMark_ && oldlen < highWaterMark_
-    && highWaterMarkCallback_) {
-      loop_->queueInLoop(std::bind(highWaterMarkCallback_, shared_from_this(), oldlen + remaining));
+    size_t oldlen = outputBuffer_.readableBytes();
+    if (oldlen + remaining >= highWaterMark_ && oldlen < highWaterMark_ &&
+        highWaterMarkCallback_) {
+      loop_->queueInLoop(std::bind(highWaterMarkCallback_, shared_from_this(),
+                                   oldlen + remaining));
     }
-    outputBuffer_.append(static_cast<const char*>(message) + nwrote, remaining);
-    if (!channel_->isWriting())
-      channel_->enableWriting();
+    outputBuffer_.append(static_cast<const char *>(message) + nwrote,
+                         remaining);
+    if (!channel_->isWriting()) channel_->enableWriting();
   }
 }
 
@@ -155,7 +159,16 @@ void TcpConnection::shutdownInLoop() {
 void TcpConnection::forceClose() {
   if (state_ == kConnected || state_ == kDisconnecting) {
     setState(kDisconnecting);
-    loop_->queueInLoop(std::bind(&TcpConnection::forceCloseInLoop, shared_from_this()));
+    loop_->queueInLoop(
+        std::bind(&TcpConnection::forceCloseInLoop, shared_from_this()));
+  }
+}
+
+void TcpConnection::forceCloseWithDelay(double seconds) {
+  if (state_ == kConnected || state_ == kConnecting) {
+    setState(kDisconnecting);
+    /// not forceCloseInLoop to avoid race condition
+    loop_->runAfter(seconds, std::bind(&TcpConnection::forceClose, this));
   }
 }
 
@@ -167,7 +180,7 @@ void TcpConnection::forceCloseInLoop() {
   }
 }
 
-const char* TcpConnection::stateToString() const {
+const char *TcpConnection::stateToString() const {
   switch (state_) {
     case kDisconnected:
       return "kDisconnected";
@@ -182,9 +195,7 @@ const char* TcpConnection::stateToString() const {
   }
 }
 
-void TcpConnection::setTcpNoDelay(bool on) {
-  socket_->setTcpNoDelay(on);
-}
+void TcpConnection::setTcpNoDelay(bool on) { socket_->setTcpNoDelay(on); }
 
 void TcpConnection::startRead() {
   loop_->runInLoop(std::bind(&TcpConnection::startReadInLoop, this));
@@ -249,22 +260,23 @@ void TcpConnection::handleRead(Libel::TimeStamp receiveTime) {
 void TcpConnection::handleWrite() {
   loop_->assertInLoopThread();
   if (channel_->isWriting()) {
-    ssize_t n = sockets::write(channel_->fd(), outputBuffer_.peek(), outputBuffer_.readableBytes());
+    ssize_t n = sockets::write(channel_->fd(), outputBuffer_.peek(),
+                               outputBuffer_.readableBytes());
     if (n > 0) {
       outputBuffer_.retrieve(n);
       if (outputBuffer_.readableBytes() == 0) {
         channel_->disableWriting();
         if (writeCompleteCallback_)
-          loop_->queueInLoop(std::bind(writeCompleteCallback_, shared_from_this()));
-        if (state_ == kDisconnecting)
-          shutdownInLoop();
+          loop_->queueInLoop(
+              std::bind(writeCompleteCallback_, shared_from_this()));
+        if (state_ == kDisconnecting) shutdownInLoop();
       }
     } else {
       LOG_ERROR << " failed to call write";
     }
   } else {
     LOG_TRACE << " Connection fd = " << channel_->fd()
-    << " is down, no more writing";
+              << " is down, no more writing";
   }
 }
 
@@ -283,22 +295,5 @@ void TcpConnection::handleClose() {
 void TcpConnection::handleError() {
   int err = sockets::getSocketError(channel_->fd());
   LOG_ERROR << "TcpConnection::handleError [" << name_
-  << "] - SO_ERROR = " << err << " " << strerror(err);
+            << "] - SO_ERROR = " << err << " " << strerror(err);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
