@@ -53,13 +53,18 @@ void onRequest(const HttpRequest& req, HttpResponse* resp) {
 }
 
 int main(int argc, char *argv[]) {
-  int numTheads = 0;
-  if (argc > 1) {
+  int numTheads = 0, port = 8000;
+  if (argc < 2) {
+    LOG_ERROR << "usage:./" << argv[0] << " listen_port (numThreads)";
+    return 0;
+  }
+  port = atoi(argv[1]);
+  if (argc > 2) {
     benchmark = true;
-    numTheads = atoi(argv[1]);
+    numTheads = atoi(argv[2]);
   }
   EventLoop loop;
-  HttpServer server(&loop, InetAddress(8000), "test");
+  HttpServer server(&loop, InetAddress(static_cast<uint16_t>(port)), "test");
   server.setHttpCallback(onRequest);
   server.setThreadNum(numTheads);
   server.start();
