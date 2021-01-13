@@ -10,6 +10,7 @@
 #include <functional>
 #include <memory>
 #include <cstring>
+#include <cassert>
 
 namespace Libel {
 

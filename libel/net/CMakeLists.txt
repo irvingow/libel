@@ -26,3 +26,11 @@ target_link_libraries(libel_net libel_base)
 
 add_subdirectory(http)
 add_subdirectory(tests)
+
+if (PROTOBUF_FOUND)
+    add_subdirectory(protobuf)
+    add_subdirectory(protorpc)
+else()
+    add_subdirectory(protobuf EXCLUDE_FROM_ALL)
+    add_subdirectory(protorpc EXCLUDE_FROM_ALL)
+endif()
