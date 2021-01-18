@@ -53,3 +53,10 @@ message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_T
 
 add_subdirectory(libel/base)
 add_subdirectory(libel/net)
+
+if (LIBEL_NOT_BUILD_EXAMPLES)
+    message(STATUS "libel not build examples")
+else()
+    message(STATUS "libel build examples")
+    add_subdirectory(examples)
+endif()

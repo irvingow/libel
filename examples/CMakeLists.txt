@@ -1,0 +1,5 @@
+if (PROTOBUF_FOUND)
+    add_subdirectory(protobuf)
+else()
+    add_subdirectory(protobuf EXCLUDE_FROM_ALL)
+endif()

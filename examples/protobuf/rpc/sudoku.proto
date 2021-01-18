@@ -1,0 +1,15 @@
+package sudoku;
+option cc_generic_services = true;
+
+message SudokuRequest {
+  required string checkboard = 1;
+}
+
+message SudokuResponse {
+  optional bool solved = 1 [default = false];
+  optional string checkboard = 2;
+}
+
+service SudokuService {
+  rpc Solve(SudokuRequest) returns (SudokuResponse);
+}

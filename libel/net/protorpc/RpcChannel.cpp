@@ -101,7 +101,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr &conn,
               service->GetRequestPrototype(methodDescriptor).New());
           if (request->ParseFromString(message.request())) {
             google::protobuf::Message *response =
-                service->GetRequestPrototype(methodDescriptor).New();
+                service->GetResponsePrototype(methodDescriptor).New();
             // response is deleted in doneCallback
             auto id = message.id();
             service->CallMethod(
