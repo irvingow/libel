@@ -197,6 +197,55 @@ void testBadBuffer() {
   }
 }
 
+int g_count = 0;
+
+void onMessage(const Libel::net::TcpConnectionPtr& conn,
+               const MessagePtr& message,
+               Libel::TimeStamp ) {
+  g_count++;
+}
+
+void testOnMessage() {
+  Libel::Query query;
+  query.set_id(1);
+  query.set_questioner("Liu wj");
+  query.set_question("Running?");
+
+  Buffer buffer;
+  ProtobufCodec::fillEmptyBuffer(&buffer, query);
+
+  Libel::Empty empty;
+  empty.set_id(43);
+  empty.set_id(1982);
+
+  Buffer buffer1;
+  ProtobufCodec::fillEmptyBuffer(&buffer1, empty);
+
+  size_t totalLen = buffer.readableBytes() + buffer1.readableBytes();
+  Buffer all;
+  all.append(buffer.peek(), buffer.readableBytes());
+  all.append(buffer1.peek(), buffer1.readableBytes());
+  assert(all.readableBytes() == totalLen);
+  Libel::net::TcpConnectionPtr conn;
+  Libel::TimeStamp timeStamp;
+  ProtobufCodec codec(onMessage);
+  for (size_t len = 0; len <= totalLen; ++len) {
+    Buffer input;
+
+    input.append(all.peek(), len);
+    g_count = 0;
+    codec.onMessage(conn, &input, timeStamp);
+    int expected = len < buffer.readableBytes() ? 0 : 1;
+    if (len == totalLen)
+      expected = 2;
+    assert(g_count == expected);
+    (void) expected;
+    input.append(all.peek()+ len, totalLen - len);
+    codec.onMessage(conn, &input, timeStamp);
+    assert(g_count == 2);
+  }
+}
+
 int main() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -208,4 +257,9 @@ int main() {
   puts("");
   testBadBuffer();
   puts("");
+  testOnMessage();
+  puts("");
+
+  puts("lucky!All pass!");
+  google::protobuf::ShutdownProtobufLibrary();
 }
