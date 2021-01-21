@@ -18,19 +18,19 @@ set_target_properties(protobuf_codec_test PROPERTIES COMPILE_FLAGS "-Wno-error=s
 target_link_libraries(protobuf_codec_test protobuf_codec query_proto)
 
 add_executable(protobuf_dispatcher_test dispatcher_test.cpp)
-set_target_properties(protobuf_dispatcher_test PROPERTIES COMPILE_FLAGS "-Wno-error=shaodw")
+set_target_properties(protobuf_dispatcher_test PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
 target_link_libraries(protobuf_dispatcher_test query_proto)
 
 add_executable(protobuf_dispatcher_lite_test dispatcher_lite_test.cpp)
-set_target_properties(protobuf_dispatcher_lite_test PROPERTIES COMPILE_FLAGS "-Wno-error=shaodw")
+set_target_properties(protobuf_dispatcher_lite_test PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
 target_link_libraries(protobuf_dispatcher_lite_test query_proto)
 
 add_executable(protobuf_server server.cpp)
-set_target_properties(protobuf_server PROPERTIES COMPILE_FLAGS "-Wno-error=shaodw")
+set_target_properties(protobuf_server PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
 target_link_libraries(protobuf_server protobuf_codec query_proto)
 
 add_executable(protobuf_client client.cpp)
-set_target_properties(protobuf_client PROPERTIES COMPILE_FLAGS "-Wno-error=shaodw")
+set_target_properties(protobuf_client PROPERTIES COMPILE_FLAGS "-Wno-error=shadow")
 target_link_libraries(protobuf_client protobuf_codec query_proto)
 
 add_custom_target(protobuf_codec_all

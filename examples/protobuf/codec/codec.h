@@ -45,9 +45,9 @@ class ProtobufCodec : Libel::noncopyable {
         errorCallback_(defaultErrorCallback) {}
 
   ProtobufCodec(ProtobufMessageCallback messageCallback,
-                ErrorCallback errorCallback_)
+                ErrorCallback errorCallback)
       : messageCallback_(std::move(messageCallback)),
-        errorCallback_(std::move(errorCallback_)) {}
+        errorCallback_(std::move(errorCallback)) {}
 
   void onMessage(const Libel::net::TcpConnectionPtr& conn,
                  Libel::net::Buffer* buffer, Libel::TimeStamp receiveTime);
@@ -58,10 +58,10 @@ class ProtobufCodec : Libel::noncopyable {
   }
 
   static const std::string& errorCodeToString(ErrorCode errorCode);
-  static void fillEmptyBuffer(Libel::net::Buffer* buffer, const google::protobuf::Message &message);
+  static void fillEmptyBuffer(Libel::net::Buffer* buffer,
+                              const google::protobuf::Message& message);
   static google::protobuf::Message* createMessage(const std::string& type_name);
   static MessagePtr parse(const char* buffer, int len, ErrorCode* errorCode);
-
 
  private:
   static void defaultErrorCallback(const Libel::net::TcpConnectionPtr&,
