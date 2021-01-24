@@ -25,7 +25,7 @@ void testQuery() {
   Libel::Query query;
   query.set_id(1);
   query.set_questioner("Liu wj");
-  query.set_question("Running?");
+  query.add_question("Running?");
 
   Buffer buffer;
   ProtobufCodec::fillEmptyBuffer(&buffer, query);
@@ -209,7 +209,7 @@ void testOnMessage() {
   Libel::Query query;
   query.set_id(1);
   query.set_questioner("Liu wj");
-  query.set_question("Running?");
+  query.add_question("Running?");
 
   Buffer buffer;
   ProtobufCodec::fillEmptyBuffer(&buffer, query);

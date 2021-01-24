@@ -4,7 +4,7 @@ option cc_generic_services = true;
 message Query {
   required int64 id = 1;
   required string questioner = 2;
-  required string question = 3;
+  repeated string question = 3;
 }
 
 message Answer {

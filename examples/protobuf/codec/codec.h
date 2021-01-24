@@ -55,6 +55,8 @@ class ProtobufCodec : Libel::noncopyable {
   void send(const Libel::net::TcpConnectionPtr& conn,
             const google::protobuf::Message& message) {
     Libel::net::Buffer buffer;
+    fillEmptyBuffer(&buffer, message);
+    conn->send(&buffer);
   }
 
   static const std::string& errorCodeToString(ErrorCode errorCode);
