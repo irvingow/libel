@@ -38,6 +38,7 @@ class RpcClient : noncopyable {
       channel_->setConnection(connection);
       sudoku::SudokuRequest request;
       request.set_checkboard("001010");
+      // deleted when receive response from server
       auto response = new sudoku::SudokuResponse;
 
       stub_.Solve(

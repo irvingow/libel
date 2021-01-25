@@ -43,14 +43,18 @@ void RpcChannel::CallMethod(const ::google::protobuf::MethodDescriptor *method,
   message.set_type(REQUEST);
   message.set_id(++id_);
   message.set_service(method->service()->full_name());
+  LOG_DEBUG << "service full_name is:" << method->service()->full_name();
   message.set_method(method->name());
+  LOG_DEBUG << "method is:" << method->name();
   message.set_request(request->SerializeAsString());
 
+  // register info to outstandings_
   OutstandingCall out = {response, done};
   {
     MutexLockGuard lock(mutexLock_);
     outstandings_[id_] = out;
   }
+  // send request to server
   codec_.send(conn_, message);
 }
 
@@ -65,6 +69,7 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr &conn,
   assert(conn == conn_);
   RpcMessage &message = *messagePtr;
   if (message.type() == MessageType::RESPONSE) {
+    // called when client receive RESPONSE from server
     auto id = message.id();
     assert(message.has_response() || message.has_error());
     OutstandingCall out = {nullptr, nullptr};
@@ -77,6 +82,8 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr &conn,
       }
     }
     if (out.response) {
+      // out.response is newed in user file,
+      // out.response is deleted after d exit scope
       std::unique_ptr<google::protobuf::Message> d(out.response);
       if (message.has_response()) {
         out.response->ParseFromString(message.response());
@@ -86,20 +93,33 @@ void RpcChannel::onRpcMessage(const TcpConnectionPtr &conn,
       }
     }
   } else if (message.type() == REQUEST) {
+    // called when server receive REQUEST from client
     ErrorCode errorCode = WRONG_PROTO;
     if (services_) {
       auto iter = services_->find(message.service());
       if (iter != services_->end()) {
+        // notice that here message and service come from two .proto files
+        // for example, service means sudoku service
+        // while message means message defined in rpc.proto
         google::protobuf::Service *service = iter->second;
         assert(service != nullptr);
         const google::protobuf::ServiceDescriptor *descriptor =
             service->GetDescriptor();
+        // we get methodName from message.method()
+        // and we get related methodDesciptor from descriptor->FindMethodByName()
         const google::protobuf::MethodDescriptor *methodDescriptor =
             descriptor->FindMethodByName(message.method());
         if (methodDescriptor) {
+          // we get request object from methodDescriptor and service->GetRequestPrototype()
+          // for example, if methodDescriptor is the related MethodDescriptor of
+          // method "sudoku.Solve", request is the type of "SudokuRequest"
           std::unique_ptr<google::protobuf::Message> request(
               service->GetRequestPrototype(methodDescriptor).New());
           if (request->ParseFromString(message.request())) {
+            // similar to request, we get response object from
+            // methodDesciptor and service->GetResponsePrototype()
+            // for example, if methodDescriptor is the related MethodDescriptor of
+            // method "sudoku.Solve", response is the type of "SudokuResponse"
             google::protobuf::Message *response =
                 service->GetResponsePrototype(methodDescriptor).New();
             // response is deleted in doneCallback
