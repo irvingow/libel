@@ -72,7 +72,6 @@ bool HttpContext::parseRequest(Buffer* buffer, TimeStamp receiveTime) {
       }
     } else if (state_ == kExpectBody) {
       // FIXME
-      break;
     }
   }
   return ok;

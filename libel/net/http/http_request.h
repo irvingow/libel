@@ -94,6 +94,7 @@ class HttpRequest {
     while (!value.empty() && isspace(value.back())) {
       value.resize(value.size() - 1);
     }
+    headers_[field] = value;
   }
 
   std::string getHeader(const std::string& field) const {
