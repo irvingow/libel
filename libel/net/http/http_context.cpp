@@ -16,7 +16,7 @@ bool HttpContext::processRequestLine(const char* begin, const char* end) {
     start = space + 1;
     space = std::find(start, end, ' ');
     if (space != end) {
-      const char* question = std::find(start, space, ' ');
+      const char* question = std::find(start, space, '?');
       if (question != space) {
         request_.setPath(start, question);
         request_.setQuery(question, space);
@@ -38,6 +38,13 @@ bool HttpContext::processRequestLine(const char* begin, const char* end) {
   return success;
 }
 
+/// HTTP 1.1 Request message
+/// | method | Space | URL | Space | HTTP Version | \r\n  <- RequestLine
+/// | HeaderField | : | Value | \r\n
+/// | ... |
+/// | HeaderField | : | Value | \r\n
+/// | \r\n |
+/// | Request Body |
 bool HttpContext::parseRequest(Buffer* buffer, TimeStamp receiveTime) {
   bool ok = true, hasMore = true;
   while (hasMore) {

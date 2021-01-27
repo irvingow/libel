@@ -53,6 +53,7 @@ void onRequest(const HttpRequest& req, HttpResponse* resp) {
 }
 
 int main(int argc, char *argv[]) {
+  Logger::setLogLevel(Libel::Logger::DEBUG);
   int numTheads = 0, port = 8000;
   if (argc < 2) {
     LOG_ERROR << "usage:./" << argv[0] << " listen_port (numThreads)";

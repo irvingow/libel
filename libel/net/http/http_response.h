@@ -51,6 +51,10 @@ public:
     addHeader("Content-type", contentType);
   }
 
+  void setContentLength(const std::string& contentLength) {
+    addHeader("Content-Length", contentLength);
+  }
+
   void addHeader(const std::string& key, const std::string &value) {
     headers_[key] = value;
   }
@@ -60,6 +64,8 @@ public:
   }
 
   void appendToBuffer(Buffer* buffer) const;
+
+  void clear();
 
 private:
   std::map<std::string, std::string> headers_;

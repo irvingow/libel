@@ -10,6 +10,13 @@
 using namespace Libel;
 using namespace Libel::net;
 
+void HttpResponse::clear() {
+  headers_.clear();
+  body_.clear();
+  statusMessage_.clear();
+  statusCode_ = kUnknown;
+}
+
 void HttpResponse::appendToBuffer(Buffer* outputBuffer) const {
   char buf[32] = {};
   snprintf(buf, sizeof buf, "HTTP/1.1 %d", statusCode_);
