@@ -3,3 +3,5 @@ if (PROTOBUF_FOUND)
 else()
     add_subdirectory(protobuf EXCLUDE_FROM_ALL)
 endif()
+
+add_subdirectory(webserver)
