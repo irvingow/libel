@@ -9,6 +9,8 @@
 
 #include <unistd.h>
 #include <cstdio>
+#include <vector>
+#include <sstream>
 
 void print() { printf("tid = %d\n", Libel::CurrentThread::tid()); }
 
@@ -26,6 +28,17 @@ void test(int maxSize) {
   LOG_WARN << "Adding";
   threadPool.run(print);
   threadPool.run(print);
+  std::vector<int> nums{1,2,3,4,5,6};
+  Libel::CountDownLatch tmp(1);
+  auto output = [&](std::stringstream& ss) {
+    for (const auto& num : nums)
+      ss << num;
+    tmp.countDown();
+  };
+  std::stringstream ss;
+  threadPool.run(std::bind(output, std::ref(ss)));
+  tmp.wait();
+  assert(ss.str() == "123456");
   for (int i = 0; i < 100; ++i) {
     char buf[32] = {0};
     snprintf(buf, sizeof(buf), "task %d", i);

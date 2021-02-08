@@ -50,7 +50,6 @@ void HttpServer::onConnection(const TcpConnectionPtr &connection) {
 }
 
 void HttpServer::onMessage(const TcpConnectionPtr &connection, Buffer *buffer, TimeStamp receiveTime) {
-  LOG_DEBUG << "receive request:" << buffer->toString();
   std::shared_ptr<HttpContext> context = std::static_pointer_cast<HttpContext>(connection->getContext());
   if (!context->parseRequest(buffer, receiveTime)) {
     connection->send("HTTP/1.1 400 Bad Request\r\n\r\n");
